@@ -45,11 +45,6 @@ namespace MicrophoneSwitch
             _lastKeyAttempt = key;
         }
 
-        private static void HandleHotkeyCore(int key)
-        {
-
-        }
-
         public static void SetDelaySeconds(double delaySeconds)
         {
             _delaySeconds = delaySeconds;

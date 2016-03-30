@@ -61,7 +61,7 @@ namespace MicrophoneSwitch
         private void OnSampleCalculated(object sender, MaxSampleEventArgs e)
         {
             CurrentInputLevel = Math.Max(e.MaxSample, Math.Abs(e.MinSample)) * 100;
-            if (CurrentInputLevel > TriggerLevel)
+            if (Win32.IsEnabled && CurrentInputLevel > TriggerLevel)
             {
                 HotkeyManager.HandleHotkey(KeyBinding + 1);
             }

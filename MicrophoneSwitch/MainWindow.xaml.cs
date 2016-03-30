@@ -7,11 +7,14 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 
 namespace MicrophoneSwitch
 {
     public class Win32
     {
+
+        public static bool IsEnabled { get; set; }
 
         public const UInt32 WM_KEYDOWN = 0x0100;
         public const int VK_1 = 0x31;
@@ -71,8 +74,13 @@ namespace MicrophoneSwitch
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-    }
+        [DllImport("User32.dll")]
+        public static extern bool RegisterHotKey([In] IntPtr hWnd, [In] int id, [In] uint fsModifiers, [In] uint vk);
 
+        [DllImport("User32.dll")]
+        public static extern bool UnregisterHotKey([In] IntPtr hWnd, [In] int id);
+
+    }
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -80,7 +88,7 @@ namespace MicrophoneSwitch
     public partial class MainWindow : Window
     {
         private List<IntPtr> _wirecastWindows = new List<IntPtr>();
-
+        
         public MainWindow()
         { 
             InitializeComponent();
@@ -155,6 +163,80 @@ namespace MicrophoneSwitch
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             HotkeyManager.SetNoiseReduction(true);
+        }
+
+        #region Handle Global Hotkey stuff
+
+        private HwndSource _source;
+        private const int HOTKEY_ID = 9000;
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var helper = new WindowInteropHelper(this);
+            _source = HwndSource.FromHwnd(helper.Handle);
+            _source.AddHook(HwndHook);
+            RegisterHotKey();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _source.RemoveHook(HwndHook);
+            _source = null;
+            UnregisterHotKey();
+            base.OnClosed(e);
+        }
+
+        private void RegisterHotKey()
+        {
+            var helper = new WindowInteropHelper(this);
+            const uint VK_F10 = 0x79;
+            const uint MOD_CTRL = 0x0002;
+            if (!Win32.RegisterHotKey(helper.Handle, HOTKEY_ID, MOD_CTRL, VK_F10))
+            {
+                // handle error
+            }
+        }
+
+        private void UnregisterHotKey()
+        {
+            var helper = new WindowInteropHelper(this);
+            Win32.UnregisterHotKey(helper.Handle, HOTKEY_ID);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_HOTKEY = 0x0312;
+            switch (msg)
+            {
+                case WM_HOTKEY:
+                    switch (wParam.ToInt32())
+                    {
+                        case HOTKEY_ID:
+                            OnHotKeyPressed();
+                            handled = true;
+                            break;
+                    }
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void OnHotKeyPressed()
+        {
+            _micEnabledCheckbox.IsChecked = !_micEnabledCheckbox.IsChecked;
+        }
+
+        #endregion Handle global hotkey stuff
+
+        private void _micEnabledCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            Win32.IsEnabled = true;
+        }
+
+        private void _micEnabledCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Win32.IsEnabled = false;
         }
     }
 }
