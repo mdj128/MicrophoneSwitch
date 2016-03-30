@@ -1,0 +1,40 @@
+﻿<Grid x:Class="MicrophoneSwitch.MicrophoneView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MicrophoneSwitch"
+             mc:Ignorable="d">
+    <Border BorderThickness="1" CornerRadius="3" BorderBrush="Black" Margin="0,5,0,5">
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock HorizontalAlignment="Left" Text="{Binding MicName}" FontWeight="Bold" Margin="3"/>
+            <Button Grid.Column="2" HorizontalAlignment="Right" Content="❌" Click="Button_Click"/>
+            <ComboBox SelectedIndex="{Binding KeyBinding, Mode=TwoWay}" HorizontalAlignment="Left" Grid.Column="2" Width="40" ToolTip="This is the hotkey that will be sent when the mic reaches the db threshold.">
+                <ComboBoxItem Content="1" />
+                <ComboBoxItem Content="2" />
+                <ComboBoxItem Content="3" />
+                <ComboBoxItem Content="4" />
+                <ComboBoxItem Content="5" />
+                <ComboBoxItem Content="6" />
+                <ComboBoxItem Content="7" />
+                <ComboBoxItem Content="8" />
+                <ComboBoxItem Content="9" />
+            </ComboBox>
+            <Slider Grid.Row="3" Grid.ColumnSpan="3" Value="{Binding TriggerLevel, Mode=TwoWay}" Minimum="0" Maximum="100"/>
+            <ProgressBar Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="5,0,5,0"
+                     Value="{Binding CurrentInputLevel, Mode=OneWay}" Height="20" ToolTip="Choose the threshold you'd like to trigger a camera switch on." />
+        </Grid>
+    </Border>
+</Grid>
