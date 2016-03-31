@@ -52,7 +52,7 @@ namespace MicrophoneSwitch
                 case 9:
                     return VK_9;
                 default:
-                    throw new ArgumentException("Not a valid number");
+                    return VK_1;
             }
         }
 
@@ -237,6 +237,8 @@ namespace MicrophoneSwitch
         private void _micEnabledCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             Win32.IsEnabled = false;
+            // Set the last key sent on the hotkey manager to -1. This way, when the mic is re-enabled it will start doing proper switching again.
+            HotkeyManager.LastKeySent = -1;
         }
     }
 }

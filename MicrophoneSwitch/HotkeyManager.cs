@@ -7,7 +7,6 @@ namespace MicrophoneSwitch
     public static class HotkeyManager
     {
         private static int _lastKeyRequested;
-        private static int _lastKeySent;
         private static BackgroundWorker _worker;
         private static double _delaySeconds;
         private static IntPtr _appWindowHandle;
@@ -22,6 +21,8 @@ namespace MicrophoneSwitch
             _worker.RunWorkerAsync();
             _delaySeconds = 2;
         }
+
+        public static int LastKeySent { get; set; }
         
         private static void OnWorkerDoWork(object sender, DoWorkEventArgs e)
         {
@@ -33,11 +34,11 @@ namespace MicrophoneSwitch
             if (key == _lastKeyAttempt || !_noiseReduction) // We got two key attempts in a row, or we're ignoring noise reduction
             {
                 _lastKeyRequested = key;
-                if (_lastKeyRequested != _lastKeySent && !_worker.IsBusy)
+                if (_lastKeyRequested != LastKeySent && !_worker.IsBusy)
                 {
-                    _lastKeySent = _lastKeyRequested;
+                    LastKeySent = _lastKeyRequested;
                     Win32.SetForegroundWindow(_appWindowHandle);
-                    Win32.PostMessage(_appWindowHandle, Win32.WM_KEYDOWN, Win32.NumberToVK(_lastKeySent), 0);
+                    Win32.PostMessage(_appWindowHandle, Win32.WM_KEYDOWN, Win32.NumberToVK(LastKeySent), 0);
                     _worker.RunWorkerAsync();
                 }
             }
